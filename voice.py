@@ -5,10 +5,12 @@ from pvrecorder import PvRecorder
 import torch
 import logging
 import re
-from langchain_ollama import OllamaEmbeddings
+from chat_model import graph, get_config
+from langchain.messages import HumanMessage
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 logger.debug(f"Available Recording Devices: {PvRecorder.get_available_devices()}")
 
 
@@ -88,6 +90,9 @@ def main():
                     # 3. Print Results
                     print(f"[Transcribed]: {result["text"]}")
 
+                    response = graph.invoke({"messages": HumanMessage(result["text"])}, config=get_config())
+                    response["messages"][-1].pretty_print()
+                    
                     if re.search("bye", result["text"], flags=re.IGNORECASE) != None: # type: ignore
                         break
                     
